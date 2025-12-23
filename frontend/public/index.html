@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CALO | City AI Logic Operator</title>
+    <link rel="stylesheet" href="../src/styles/main.css">
+    <script type="module" src="../src/scripts/main.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <h1>CALO</h1>
+        <p class="subtitle">City AI Logic Operator</p>
+    </header>
+
+    <main>
+        <!-- Section 1: Current Status -->
+        <section id="status-section" class="card">
+            <h2>City Status</h2>
+            <div id="status-indicator">Loading...</div>
+        </section>
+
+        <!-- Section 2: AI Explanation (The "Why") -->
+        <section id="explanation-section" class="card">
+            <h2>Why does CALO say this?</h2>
+            <p id="summary-text">Waiting for data...</p>
+            <ul id="details-list">
+                <!-- List items will be injected here -->
+            </ul>
+        </section>
+
+        <!-- Section 3: Future Risk (The "What's Next") -->
+        <section id="future-section" class="card hidden">
+            <h2>Future Risk Projection</h2>
+            <p id="future-text">...</p>
+        </section>
+
+        <button id="reveal-future-btn">Reveal Future Projection</button>
+    </main>
+
+    <footer>
+        <p>System Status: <span id="system-status">Offline</span></p>
+    </footer>
+</body>
+
+</html>

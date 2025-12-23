@@ -1,0 +1,33 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AnalyzeResponse",
+    "description": "The response format for the /analyze endpoint, used by both backend (producer) and frontend (consumer).",
+    "type": "object",
+    "required": [
+        "status",
+        "summary",
+        "details",
+        "future"
+    ],
+    "properties": {
+        "status": {
+            "type": "string",
+            "description": "High-level city status (e.g., 'Healthy', 'Warning', 'Critical')."
+        },
+        "summary": {
+            "type": "string",
+            "description": "1-2 sentence narrative explanation of the current state."
+        },
+        "details": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "List of specific supporting evidence (e.g., 'High search volume for flu', 'Temperature drop')."
+        },
+        "future": {
+            "type": "string",
+            "description": "AI prediction of what might happen next if current trends continue."
+        }
+    }
+}
