@@ -1,48 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CALO | City AI Logic Operator</title>
+    <title>CALO | Udaipur City Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../src/styles/main.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <script type="module" src="../src/scripts/main.js" defer></script>
 </head>
+<body class="bg-slate-50 text-slate-800 h-screen flex flex-col items-center justify-center p-6 overflow-hidden">
 
-<body>
-    <header>
-        <h1>CALO</h1>
-        <p class="subtitle">City AI Logic Operator</p>
-    </header>
+    <!-- Container -->
+    <main class="w-full max-w-xl mx-auto relative min-h-[500px] flex flex-col justify-center">
+        
+        <!-- HEADER (Persistent) -->
+        <header class="absolute top-0 left-0 w-full flex justify-between items-center py-4 border-b border-slate-200 mb-8 z-10">
+            <h1 class="font-bold text-sm tracking-widest text-slate-400 uppercase">CALO // UDAIPUR</h1>
+            <div id="connection-status" class="w-2 h-2 rounded-full bg-slate-300 transition-colors duration-500" title="System Offline"></div>
+        </header>
 
-    <main>
-        <!-- Section 1: Current Status -->
-        <section id="status-section" class="card">
-            <h2>City Status</h2>
-            <div id="status-indicator">Loading...</div>
+        <!-- VIEW 1: HOME (STATUS) -->
+        <section id="view-home" class="view-section text-center space-y-8 transition-opacity duration-500">
+            <div class="space-y-2">
+                <p class="text-slate-500 text-sm font-medium tracking-wide uppercase">City Health Status</p>
+                <!-- Status Badge -->
+                <div id="status-badge" class="inline-flex items-center px-6 py-2 rounded-full bg-slate-200 text-slate-600 font-semibold text-lg transition-all duration-500">
+                    Initializing...
+                </div>
+            </div>
+
+            <div class="py-6">
+                <h2 id="summary-text" class="text-3xl md:text-4xl font-light leading-relaxed text-slate-900">
+                    Connecting to city intelligence network...
+                </h2>
+            </div>
+            
+            <button onclick="window.app.navigateTo('explain')" class="mt-8 text-slate-400 hover:text-slate-800 text-sm font-medium transition-colors flex items-center justify-center gap-2 mx-auto group">
+                Why does CALO say this?
+                <span class="transform group-hover:translate-x-1 transition-transform">→</span>
+            </button>
         </section>
 
-        <!-- Section 2: AI Explanation (The "Why") -->
-        <section id="explanation-section" class="card">
-            <h2>Why does CALO say this?</h2>
-            <p id="summary-text">Waiting for data...</p>
-            <ul id="details-list">
-                <!-- List items will be injected here -->
-            </ul>
+        <!-- VIEW 2: EXPLAIN (WHY) -->
+        <section id="view-explain" class="view-section space-y-6 hidden opacity-0 transition-opacity duration-500">
+            <div class="border-l-4 border-slate-300 pl-6">
+                <h3 class="text-2xl font-semibold text-slate-900 mb-2">Analysis Factors</h3>
+                <p class="text-slate-500 text-sm mb-6">Signals analyzed from public infrastructure data.</p>
+                
+                <ul id="details-list" class="space-y-4 text-lg text-slate-700 font-light list-none">
+                    <!-- JS will populate -->
+                    <li class="skeleton h-6 bg-slate-200 rounded w-3/4 animate-pulse"></li>
+                    <li class="skeleton h-6 bg-slate-200 rounded w-1/2 animate-pulse delay-75"></li>
+                </ul>
+            </div>
+
+            <div class="flex items-center justify-between pt-8">
+                <button onclick="window.app.navigateTo('home')" class="text-slate-400 hover:text-slate-600 text-sm font-medium transition-colors">
+                    ← Back
+                </button>
+                <button onclick="window.app.navigateTo('predict')" class="bg-slate-900 hover:bg-slate-700 text-white px-6 py-3 rounded shadow-md transition-all text-sm font-medium">
+                    What happens next?
+                </button>
+            </div>
         </section>
 
-        <!-- Section 3: Future Risk (The "What's Next") -->
-        <section id="future-section" class="card hidden">
-            <h2>Future Risk Projection</h2>
-            <p id="future-text">...</p>
+        <!-- VIEW 3: PREDICT (FUTURE) -->
+        <section id="view-predict" class="view-section space-y-8 hidden opacity-0 transition-opacity duration-500 container-center">
+             <div class="space-y-2">
+                <p class="text-slate-500 text-sm font-medium tracking-wide uppercase">Projected Impact</p>
+                <div class="p-6 bg-white border border-slate-200 shadow-sm rounded-lg">
+                    <p id="future-text" class="text-xl md:text-2xl font-light leading-relaxed text-slate-800">
+                        <!-- Hidden initially -->
+                        <span class="blur-md select-none transition-all duration-1000" id="future-blur">
+                            Analysis of long-term trends suggests potential infrastructure stress if current patterns continue unmodified.
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <button id="reveal-btn" class="w-full py-4 border border-slate-300 text-slate-600 rounded hover:bg-slate-50 transition-colors font-medium text-sm tracking-wide uppercase">
+                Reveal Projection
+            </button>
+
+            <button onclick="window.app.navigateTo('explain')" class="block w-full text-center text-slate-400 hover:text-slate-600 text-sm mt-4">
+                ← Return to analysis
+            </button>
         </section>
 
-        <button id="reveal-future-btn">Reveal Future Projection</button>
     </main>
 
-    <footer>
-        <p>System Status: <span id="system-status">Offline</span></p>
+    <footer class="fixed bottom-0 w-full py-4 text-center">
+        <p class="text-[10px] text-slate-300 uppercase tracking-widest">
+            CALO System v2.0 | Udaipur
+        </p>
     </footer>
-</body>
 
+</body>
 </html>
