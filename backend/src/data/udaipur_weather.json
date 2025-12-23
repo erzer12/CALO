@@ -1,0 +1,26 @@
+{
+    "city": "Udaipur",
+    "forecast": [
+        {
+            "date": "2025-12-24",
+            "temperature_celsius": 24,
+            "humidity_percent": 65,
+            "rainfall_mm": 12.5,
+            "condition": "Light Rain"
+        },
+        {
+            "date": "2025-12-23",
+            "temperature_celsius": 25,
+            "humidity_percent": 60,
+            "rainfall_mm": 5.0,
+            "condition": "Cloudy"
+        },
+        {
+            "date": "2025-12-22",
+            "temperature_celsius": 26,
+            "humidity_percent": 55,
+            "rainfall_mm": 0.0,
+            "condition": "Sunny"
+        }
+    ]
+}

@@ -27,15 +27,16 @@ def analyze_city():
     3. Generate AI Reasoning
     4. Format Response according to Contract
     """
-    # Step 1: data = data_loader.load_latest_data()
-    # Step 2: signals = signal_builder.compute_signals(data)
-    # Step 3: insights = ai_reasoner.reason(signals)
-    # Step 4: response = formatter.format(insights)
+    # Step 1: Load Data
+    data = data_loader.load_latest_data()
     
-    # Placeholder return for now
-    return {
-        "status": "System Initialized",
-        "summary": "The backend structure is ready. Logic to be implemented.",
-        "details": ["Service 1 loaded", "Service 2 loaded"],
-        "future": "Implementation of reasoning logic pending."
-    }
+    # Step 2: Build Signals
+    signals = signal_builder.compute_signals(data)
+    
+    # Step 3: Reason with AI
+    insights = ai_reasoner.reason(signals)
+    
+    # Step 4: Format Response
+    response = formatter.format(insights)
+    
+    return response
