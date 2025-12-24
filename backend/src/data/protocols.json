@@ -8,6 +8,9 @@
                 "season_monsoon",
                 "complaint_spike"
             ],
+            "matches_risk_ids": [
+                "BIO_RISK"
+            ],
             "actions": [
                 "Dispatch fogging trucks to high-risk zones (Cluster A/B) within 24 hours.",
                 "Launch public awareness SMS campaign regarding 'stagnant water'.",
@@ -20,6 +23,9 @@
             "triggers": [
                 "flash_flood_risk",
                 "drainage_blockage"
+            ],
+            "matches_risk_ids": [
+                "FLOOD_RISK"
             ],
             "actions": [
                 "Deploy mobile suction pumps to low-lying areas (detected coordinates).",
@@ -34,6 +40,9 @@
                 "heatwave_stress",
                 "high_temp"
             ],
+            "matches_risk_ids": [
+                "HEAT_RISK"
+            ],
             "actions": [
                 "Open cooling shelters in community centers.",
                 "Suspend outdoor municipal work between 12 PM - 4 PM.",
@@ -46,6 +55,9 @@
             "triggers": [
                 "congestion_event_mismatch",
                 "vip_movement"
+            ],
+            "matches_risk_ids": [
+                "TRAFFIC_RISK"
             ],
             "actions": [
                 "Extend traffic light 'Green' duration by 20% on arterial routes.",

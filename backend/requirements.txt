@@ -1,7 +1,24 @@
 fastapi
 uvicorn
 python-dotenv
-google-genai
+google-generativeai
 pandas
 requests
 feedparser
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+httpx>=0.24.0
+
+# Code Quality
+black>=23.0.0
+flake8>=6.0.0
+
+# Production
+slowapi>=0.1.9
+
+# Enhanced Data Sources
+pytrends>=4.9.0
+textblob>=0.17.0
+newsapi-python>=0.2.7

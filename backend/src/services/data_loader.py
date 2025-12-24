@@ -1,9 +1,13 @@
 import pandas as pd
 import json
 import os
+import logging
+from datetime import datetime
 import requests
 import feedparser
 from src.config.settings import USE_REAL_DATA, WEATHER_API_URL, NEWS_RSS_URL
+
+logger = logging.getLogger(__name__)
 
 class DataLoader:
     """
@@ -22,7 +26,7 @@ class DataLoader:
             with open(path, 'r') as f:
                 return json.load(f)
         except FileNotFoundError:
-            print(f"Warning: {filename} not found.")
+            logger.warning(f"File not found: {filename}")
             return {}
 
     def _load_csv(self, filename):
@@ -30,12 +34,12 @@ class DataLoader:
             path = os.path.join(self.data_dir, filename)
             return pd.read_csv(path)
         except Exception as e:
-            print(f"Warning: Could not read {filename}. Error: {e}")
+            logger.warning(f"Could not read CSV {filename}: {e}")
             return pd.DataFrame()
 
     def _fetch_weather_api(self):
         """Fetches real weather from Open-Meteo API"""
-        print(f"Fetching weather from {WEATHER_API_URL}...")
+        logger.info(f"Fetching weather from Open-Meteo API...")
         try:
             response = requests.get(WEATHER_API_URL, timeout=5)
             response.raise_for_status()
@@ -58,12 +62,12 @@ class DataLoader:
                 ]
             }
         except Exception as e:
-            print(f"Weather API Error: {e}. Falling back to mock.")
+            logger.warning(f"Weather API Error: {e}. Falling back to mock data.")
             return None
 
     def _fetch_news_rss(self):
         """Fetches real news from RSS feed"""
-        print(f"Fetching news from {NEWS_RSS_URL}...")
+        logger.info(f"Fetching news from RSS feed...")
         try:
             feed = feedparser.parse(NEWS_RSS_URL)
             articles = []
@@ -75,7 +79,7 @@ class DataLoader:
                 })
             return articles
         except Exception as e:
-            print(f"RSS Error: {e}. Falling back to mock.")
+            logger.warning(f"RSS feed error: {e}. Falling back to mock data.")
             return None
 
     def load_latest_data(self):
@@ -93,7 +97,7 @@ class DataLoader:
         }
 
         if USE_REAL_DATA:
-            print(">>> REAL DATA MODE ENABLED <<<")
+            logger.info(">>> REAL DATA MODE ENABLED <<<")
             
             # 1. Weather
             real_weather = self._fetch_weather_api()

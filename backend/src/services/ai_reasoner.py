@@ -1,10 +1,13 @@
 import os
 import json
-from google import genai
+import logging
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 class AIReasoner:
     """
@@ -15,11 +18,13 @@ class AIReasoner:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
         if self.api_key:
-            self.client = genai.Client(api_key=self.api_key)
-            self.model_name = 'gemini-2.0-flash-exp'
+            genai.configure(api_key=self.api_key)
+            # Note: google-generativeai is deprecated but we'll use models/gemini-pro for v1beta API
+            self.model = genai.GenerativeModel('models/gemini-pro')
+            logger.info("Gemini AI initialized with models/gemini-pro")
         else:
-            print("Warning: GEMINI_API_KEY not found. AI Reasoner will return mock data.")
-            self.client = None
+            logger.warning("GEMINI_API_KEY not found. AI Reasoner will return mock data.")
+            self.model = None
             
         self.protocols = self._load_protocols()
 
@@ -33,38 +38,27 @@ class AIReasoner:
                 data = json.load(f)
                 return data.get('protocols', [])
         except Exception as e:
-            print(f"Error loading protocols: {e}")
+            logger.error(f"Error loading protocols: {e}", exc_info=True)
             return []
 
     def _retrieve_relevant_protocols(self, active_risks):
         """
-        Simulates GraphRAG: Selects protocols that match the active risk IDs.
+        Retrieves protocols that match the active risk IDs.
+        Uses the 'matches_risk_ids' field from protocols.json for explicit matching.
         """
         if not active_risks:
             return []
             
         relevant = []
-        # Create a set of risk triggers for faster lookup (simple string matching for MVP)
-        risk_ids = [r['id'] for r in active_risks]
+        risk_ids = {r['id'] for r in active_risks}
         
-        for p in self.protocols:
-            # Check if any of the protocol's triggers partially match or map to the risk Id
-            # This is a heuristic mapping.
-            # Risk ID: BIO_RISK -> matches protocol with trigger 'vector_risk'
-            # Risk ID: FLOOD_RISK -> matches protocol with trigger 'flash_flood_risk'
-            
-            # Simple Map
-            for trigger in p['triggers']:
-                if trigger == "vector_risk" and "BIO_RISK" in risk_ids:
-                    relevant.append(p)
-                    break
-                if trigger == "flash_flood_risk" and "FLOOD_RISK" in risk_ids:
-                    relevant.append(p)
-                    break
-                if trigger == "heatwave_stress" and "HEAT_RISK" in risk_ids:
-                    relevant.append(p)
-                    break
-                    
+        for protocol in self.protocols:
+            # Check if protocol matches any of the active risks
+            matches = protocol.get('matches_risk_ids', [])
+            if any(risk_id in risk_ids for risk_id in matches):
+                relevant.append(protocol)
+                logger.debug(f"Matched protocol {protocol['id']} to active risks")
+        
         return relevant
 
     def reason(self, logic_output):
@@ -79,7 +73,7 @@ class AIReasoner:
         # 1. Retrieve Knowledge (RAG)
         relevant_protocols = self._retrieve_relevant_protocols(active_risks)
         
-        if not self.client:
+        if not self.model:
             return {
                 "ui_mode_citizen": "System Offline",
                 "ui_mode_engineer": {"log": "No API Key"}
@@ -127,40 +121,89 @@ class AIReasoner:
         """
         
         try:
-            response = self.client.models.generate_content(
-                model=self.model_name,
-                contents=prompt
-            )
+            if not self.model:
+                raise Exception("Gemini API not configured")
+            
+            response = self.model.generate_content(prompt)
             
             clean_text = response.text.replace('```json', '').replace('```', '').strip()
             return json.loads(clean_text)
         except Exception as e:
-            print(f"AI Reasoning Error: {e}")
+            logger.error(f"AI Reasoning Error: {e}", exc_info=True)
             error_str = str(e)
-            if "INVALID_ARGUMENT" in error_str or "400" in error_str or "RESOURCE_EXHAUSTED" in error_str or "429" in error_str:
-                # Fallback Simulation for Judge/Demo if API Key fails or Quota exceeded
-                return {
-                    "citizen_view": {
-                        "status_headline": "Advisory: Simulation Mode Active", 
-                        "visual_theme": "Caution"
-                    },
-                    "engineer_view": {
-                        "confidence_score": "0.85",
-                        "detected_risks": ["SIMULATED_RISK_VECTOR"],
-                        "raw_signals": {
-                            "weather": 0.75,
-                            "complaints": 0.4,
-                            "trends": 0.9
-                        },
-                        "logic_trace": "API Key Invalid -> Switched to Determinstic Simulation.\nProtocol: FLOOD_2A matched.\nConfidence inferred from Logic Layer.",
-                        "recommended_actions": [
-                            "Check .env configuration",
-                            "Review logic_engine.py outputs directly"
-                        ]
-                    }
-                }
+            
+            # Fallback: Use real analyzed data instead of hardcoded simulation
+            # This ensures we still provide value even when AI API is unavailable
+            active_risks = logic_output.get('active_risks', [])
+            signals = logic_output.get('signals', {})
+            confidence = logic_output.get('confidence_score', 0.5)
+            
+            # Determine status based on actual risks
+            if active_risks:
+                risk_names = [r['name'] for r in active_risks]
+                max_severity = max([r['severity'] for r in active_risks])
+                
+                if max_severity > 0.7:
+                    visual_theme = "Critical"
+                    status_headline = f"Alert: {len(active_risks)} risk(s) detected"
+                else:
+                    visual_theme = "Caution"
+                    status_headline = f"Advisory: {len(active_risks)} risk(s) require attention"
+            else:
+                visual_theme = "Normal"
+                status_headline = "City systems normal - AI analysis offline"
+                risk_names = []
+            
+            # Get relevant protocols for actions
+            relevant_protocols = self._retrieve_relevant_protocols(active_risks)
+            recommended_actions = []
+            for protocol in relevant_protocols:
+                recommended_actions.extend(protocol.get('actions', []))
+            
+            # If no protocols matched, provide generic actions
+            if not recommended_actions:
+                if active_risks:
+                    recommended_actions = [
+                        "Monitor conditions closely",
+                        "Review historical patterns for similar conditions",
+                        "Prepare contingency protocols"
+                    ]
+                else:
+                    recommended_actions = [
+                        "Continue routine monitoring",
+                        "Maintain current alert status"
+                    ]
+            
+            # Build logic trace from actual data
+            logic_trace = "AI API unavailable - Using rule-based analysis:\n"
+            logic_trace += f"• Data sources active: {int(confidence * 3)}/3\n"
+            logic_trace += f"• Weather stress: {signals.get('weather_rainfall_stress', 0):.2f} (rainfall), "
+            logic_trace += f"{signals.get('weather_heat_stress', 0):.2f} (heat)\n"
+            logic_trace += f"• Complaints stress: {signals.get('complaints_sanitation_stress', 0):.2f}\n"
+            logic_trace += f"• Social anxiety: {signals.get('social_health_anxiety', 0):.2f}\n"
+            
+            if active_risks:
+                logic_trace += f"\nDetected {len(active_risks)} risk(s):\n"
+                for risk in active_risks:
+                    logic_trace += f"• {risk['name']}: severity {risk['severity']:.2f}\n"
+                    logic_trace += f"  Factors: {', '.join(risk.get('contributing_factors', []))}\n"
             
             return {
-                "citizen_view": {"status_headline": "Analysis Error", "visual_theme": "Caution"},
-                "engineer_view": {"error": str(e)}
+                "citizen_view": {
+                    "status_headline": status_headline,
+                    "visual_theme": visual_theme
+                },
+                "engineer_view": {
+                    "confidence_score": f"{confidence:.2f}",
+                    "detected_risks": risk_names,
+                    "raw_signals": {
+                        "weather": round(max(signals.get('weather_rainfall_stress', 0), 
+                                           signals.get('weather_heat_stress', 0)), 2),
+                        "complaints": round(signals.get('complaints_sanitation_stress', 0), 2),
+                        "trends": round(signals.get('social_health_anxiety', 0), 2)
+                    },
+                    "logic_trace": logic_trace,
+                    "recommended_actions": recommended_actions[:5]  # Limit to 5 actions
+                }
             }
+

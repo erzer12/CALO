@@ -1,5 +1,14 @@
 import pandas as pd
 import math
+from src.config.settings import (
+    RAINFALL_CRITICAL_MM,
+    TEMP_NEUTRAL_C,
+    TEMP_MAX_C,
+    COMPLAINTS_CRITICAL,
+    DISEASE_RISK_THRESHOLD,
+    FLOOD_RISK_THRESHOLD,
+    HEAT_RISK_THRESHOLD
+)
 
 class LogicEngine:
     """
@@ -20,15 +29,15 @@ class LogicEngine:
         weather = raw_data.get('weather', {})
         forecast = weather.get('forecast', [{}])[0]
         
-        # Rainfall Stress: >50mm is 1.0 (High)
+        # Rainfall Stress: Configured threshold
         rainfall = forecast.get('rainfall_mm', 0)
-        signals['weather_rainfall_stress'] = min(rainfall / 50.0, 1.0)
+        signals['weather_rainfall_stress'] = min(rainfall / RAINFALL_CRITICAL_MM, 1.0)
         
-        # Heat Stress: >45C is 1.0
+        # Heat Stress: Configured neutral and max temperatures
         temp = forecast.get('temperature_celsius', 25)
-        # Assuming 25C is neutral (0.0), 45C is max (1.0)
+        # Assuming TEMP_NEUTRAL_C is neutral (0.0), TEMP_MAX_C is max (1.0)
         if temp:
-             signals['weather_heat_stress'] = max(0.0, min((temp - 25) / 20.0, 1.0))
+             signals['weather_heat_stress'] = max(0.0, min((temp - TEMP_NEUTRAL_C) / (TEMP_MAX_C - TEMP_NEUTRAL_C), 1.0))
         else:
             signals['weather_heat_stress'] = 0.0
             
@@ -43,8 +52,8 @@ class LogicEngine:
         if not complaints_df.empty and 'category' in complaints_df.columns:
             # Sanitation
             san_count = len(complaints_df[complaints_df['category'] == 'sanitation'])
-            # Threshold: 5 complaints = 1.0
-            signals['complaints_sanitation_stress'] = min(san_count / 5.0, 1.0)
+            # Threshold: Configured complaints threshold
+            signals['complaints_sanitation_stress'] = min(san_count / COMPLAINTS_CRITICAL, 1.0)
             
             # Drainage (simulate/infer from category or description)
             # For this MVP, let's assume 'sanitation' covers drainage broadly, 
@@ -91,7 +100,7 @@ class LogicEngine:
             (0.4 * signals.get('social_health_anxiety', 0))
         )
         
-        if disease_score > 0.4: # Threshold for attention
+        if disease_score > DISEASE_RISK_THRESHOLD:
             active_risks.append({
                 "id": "BIO_RISK",
                 "name": "Vector-Borne Disease Cluster",
@@ -106,7 +115,7 @@ class LogicEngine:
             (0.4 * signals.get('complaints_drainage_stress', 0))
         )
         
-        if flood_score > 0.5:
+        if flood_score > FLOOD_RISK_THRESHOLD:
             active_risks.append({
                 "id": "FLOOD_RISK",
                 "name": "Urban Flash Flood",
@@ -116,7 +125,7 @@ class LogicEngine:
 
         # --- Scenario C: Heatwave ---
         heat_score = signals.get('weather_heat_stress', 0)
-        if heat_score > 0.6:
+        if heat_score > HEAT_RISK_THRESHOLD:
             active_risks.append({
                 "id": "HEAT_RISK",
                 "name": "Severe Heatwave",
