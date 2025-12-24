@@ -1,0 +1,57 @@
+{
+    "protocols": [
+        {
+            "id": "DENGUE_4B",
+            "name": "Municipal Dengue Containment Protocol",
+            "triggers": [
+                "vector_risk",
+                "season_monsoon",
+                "complaint_spike"
+            ],
+            "actions": [
+                "Dispatch fogging trucks to high-risk zones (Cluster A/B) within 24 hours.",
+                "Launch public awareness SMS campaign regarding 'stagnant water'.",
+                "Alert local clinics to prepare for platelet count testing surge."
+            ]
+        },
+        {
+            "id": "FLOOD_2A",
+            "name": "Urban Flash Flood Mitigation",
+            "triggers": [
+                "flash_flood_risk",
+                "drainage_blockage"
+            ],
+            "actions": [
+                "Deploy mobile suction pumps to low-lying areas (detected coordinates).",
+                "Issue 'Orange Alert' for commuters avoiding underpasses.",
+                "Notify electricity board to secure substation perimeters."
+            ]
+        },
+        {
+            "id": "HEAT_1C",
+            "name": "Extreme Heat Action Plan",
+            "triggers": [
+                "heatwave_stress",
+                "high_temp"
+            ],
+            "actions": [
+                "Open cooling shelters in community centers.",
+                "Suspend outdoor municipal work between 12 PM - 4 PM.",
+                "Deploy water tankers to water-scarce zones."
+            ]
+        },
+        {
+            "id": "TRAFFIC_VIP",
+            "name": "VIP Movement & Event Traffic Management",
+            "triggers": [
+                "congestion_event_mismatch",
+                "vip_movement"
+            ],
+            "actions": [
+                "Extend traffic light 'Green' duration by 20% on arterial routes.",
+                "Deploy traffic marshals to choke points.",
+                "Broadcast traffic diversion route via App/Radio."
+            ]
+        }
+    ]
+}
