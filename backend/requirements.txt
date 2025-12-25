@@ -1,10 +1,10 @@
 fastapi
 uvicorn
 python-dotenv
-google-generativeai
 pandas
 requests
 feedparser
+pydantic
 
 # Testing
 pytest>=7.0.0
@@ -22,3 +22,7 @@ slowapi>=0.1.9
 pytrends>=4.9.0
 textblob>=0.17.0
 newsapi-python>=0.2.7
+
+# AI Options (choose one or both)
+groq>=0.4.0  # RECOMMENDED - Fast & Free
+google-genai>=0.2.0  # Latest Gemini SDK
